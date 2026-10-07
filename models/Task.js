@@ -6,23 +6,15 @@ const taskSchema = new mongoose.Schema({
         required: [true, "Title is required"],
         trim: true
     },
-
     description: {
         type: String,
         required: [true, "Description is required"],
         trim: true
     },
-
     completed: {
         type: Boolean,
         default: false
     },
-
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-
     priority: {
         type: String,
         enum: {
@@ -30,6 +22,14 @@ const taskSchema = new mongoose.Schema({
             message: "Priority must be low, medium, or high"
         },
         default: "medium"
+    },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
     }
 });
 
