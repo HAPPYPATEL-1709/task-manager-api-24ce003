@@ -3,6 +3,9 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
+// Register Event-Driven Architecture Listeners on startup
+require("./events/listeners");
+
 const authRoutes = require("./routes/authRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const { notFoundHandler, errorHandler } = require("./middleware/errorHandler");
@@ -38,7 +41,7 @@ app.use((req, res, next) => {
 app.use("/auth", authRoutes);
 app.use("/", authRoutes); // supports /register, /login, /me
 
-// Protected Task endpoints
+// Protected Task endpoints with caching and event emissions
 app.use("/tasks", taskRoutes);
 
 // Health check endpoint
