@@ -1,0 +1,25 @@
+# ====================================================================
+# Practical 11: Task Management Frontend Dockerfile (React + Vite)
+# Multi-stage aware build serving the production bundle on port 5173
+# ====================================================================
+
+FROM node:18 AS build
+
+# Set working directory inside container
+WORKDIR /app
+
+# Copy package manifests first to leverage Docker layer caching
+COPY package*.json ./
+
+# Install frontend dependencies inside container
+RUN npm install
+
+# Copy application source code and build production bundle
+COPY . .
+RUN npm run build
+
+# Expose Vite preview / service port
+EXPOSE 5173
+
+# Launch the built React app bound to 0.0.0.0
+CMD ["npm", "run", "preview", "--", "--host"]

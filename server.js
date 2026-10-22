@@ -60,21 +60,19 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 // 7. Database Connection and Server Startup
-const MONGO_URI = process.env.MONGO_URI;
-
-if (!MONGO_URI) {
-    console.error("CRITICAL ERROR: MONGO_URI is not defined in .env file");
-    process.exit(1);
-}
+const MONGO_URI = process.env.MONGO_URI || "mongodb://mongodb:27017/taskdb";
 
 mongoose
     .connect(MONGO_URI)
     .then(() => {
         console.log("-------------------------------------------------");
         console.log(" Connected to MongoDB successfully");
-        console.log(` Server running on http://localhost:${PORT}`);
+        console.log(` Target URI: ${MONGO_URI.includes("@") ? "MongoDB Atlas (Remote Cluster)" : MONGO_URI}`);
+        console.log(` Server running on http://0.0.0.0:${PORT}`);
         console.log("-------------------------------------------------");
-        app.listen(PORT);
+        app.listen(PORT, "0.0.0.0", () => {
+            console.log(` Server actively listening on port ${PORT}`);
+        });
     })
     .catch((err) => {
         console.error("MongoDB connection failed:", err.message);

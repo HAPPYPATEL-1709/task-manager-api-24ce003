@@ -1,0 +1,79 @@
+version: '3.8'
+
+# ===================================================================
+# Practical 11: Multi-Container Orchestration with Docker Compose
+# Services: Frontend (React/Vite) ──► Backend (Node/Express) ──► MongoDB
+# ===================================================================
+
+services:
+  # -----------------------------------------------------------------
+  # 1. MongoDB Database Service
+  # -----------------------------------------------------------------
+  mongodb:
+    image: mongo:latest
+    container_name: task-manager-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=taskdb
+    volumes:
+      # Named volume for MongoDB data persistence across container restarts
+      - mongo-data:/data/db
+    networks:
+      - app-network
+
+  # -----------------------------------------------------------------
+  # 2. Node.js / Express Backend API Service
+  # -----------------------------------------------------------------
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: task-manager-backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://mongodb:27017/taskdb
+      - JWT_SECRET=super_secret_jwt_practical_11_compose_2026
+      - JWT_EXPIRES_IN=1h
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+
+  # -----------------------------------------------------------------
+  # 3. React Frontend Service (Served via Vite Preview on port 5173)
+  # -----------------------------------------------------------------
+  frontend:
+    build:
+      context: ../task-manager-frontend
+      dockerfile: Dockerfile
+    container_name: task-manager-frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:5000
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+# ===================================================================
+# Named Volume Definitions (Data Persistence)
+# ===================================================================
+volumes:
+  mongo-data:
+    name: mongo-data
+    driver: local
+
+# ===================================================================
+# Isolated Docker Bridge Network
+# ===================================================================
+networks:
+  app-network:
+    name: app-network
+    driver: bridge
