@@ -1,6 +1,8 @@
 # Task Management API — Full Stack Backend
 
-A robust Express.js, MongoDB, and Mongoose REST API implementing JWT authentication, middleware pipelines, in-memory caching, query optimization, event-driven asynchronous background processing, and full multi-container Docker & Docker Compose orchestration.
+[![CI Pipeline](https://github.com/HAPPYPATEL-1709/task-manager-api-24ce003/actions/workflows/ci.yml/badge.svg)](https://github.com/HAPPYPATEL-1709/task-manager-api-24ce003/actions/workflows/ci.yml)
+
+A robust Express.js, MongoDB, and Mongoose REST API implementing JWT authentication, middleware pipelines, in-memory caching, query optimization, event-driven asynchronous background processing, full multi-container Docker & Docker Compose orchestration, and an automated GitHub Actions CI/CD pipeline.
 
 ---
 
@@ -9,6 +11,7 @@ A robust Express.js, MongoDB, and Mongoose REST API implementing JWT authenticat
 - [Practical 9: In-Memory Caching and Query Optimization](#practical-9-in-memory-caching--query-optimization)
 - [Practical 10: Asynchronous Processing with Event-Driven Architecture](#practical-10-asynchronous-processing-with-event-driven-architecture)
 - [Practical 11: Containerization with Docker and Docker Compose](#practical-11-containerization-with-docker-and-docker-compose)
+- [Practical 12: CI/CD Pipeline with GitHub Actions](#practical-12-cicd-pipeline-with-github-actions)
 
 ---
 
@@ -54,38 +57,44 @@ Network: app-network (bridge)
 frontend ──► backend ──► mongodb
 ```
 
-### Key Implementation Deliverables
-1. **Backend Dockerfile (`Dockerfile`)**: Containerizes Node/Express API with layer-cached `npm install` and `node:18` base image.
-2. **Frontend Dockerfile (`Dockerfile.frontend`)**: Containerizes React application with production build and preview server on port `5173`.
-3. **Multi-Container Orchestration (`docker-compose.yml`)**: Unifies `frontend`, `backend`, and `mongodb` on `app-network` with health dependency and port mappings.
-4. **Data Persistence (`mongo-data`)**: Persistent named volume for MongoDB so database state survives container restarts and rebuilds.
-5. **Build Optimization (`.dockerignore`)**: Excludes `node_modules` and `.env` from build context for fast, lean builds.
-6. **Detailed Documentation**: See [docs/docker_containerization.md](docs/docker_containerization.md) for full report, architecture diagram, and troubleshooting.
+- **Single Command Launch**: `docker-compose up --build`
+- **Data Persistence**: Named volume `mongo-data` for MongoDB state preservation across restarts.
+- **Documentation**: Full details in [docs/docker_containerization.md](docs/docker_containerization.md).
 
-### Quick Start (Single Command Run)
+---
 
-```bash
-# 1. Verify Docker installation
-docker --version
-docker compose version
+## Practical 12: CI/CD Pipeline with GitHub Actions
 
-# 2. Build and launch all 3 containers with a single command
-docker-compose up --build
+Automates testing and integration of the backend application using a cloud-hosted GitHub Actions CI pipeline on every push and pull request to `main`.
 
-# 3. Confirm all 3 containers are running
-docker ps
+### CI Architecture & Workflow Diagram
+```
+git push origin main
+       │
+       ▼
+GitHub Actions Trigger (on: push, branches: [main])
+       │
+       ▼
+Job: build-and-test (Runner: ubuntu-latest)
+├── 1. actions/checkout@v4 (Clone repository)
+├── 2. actions/setup-node@v4 (Node.js 18 + npm cache)
+├── 3. npm install (Install runtime & dev dependencies)
+└── 4. npm test (Jest + Supertest test execution)
+       │
+       ▼
+Status: Green checkmark (Pass) or Red X (Fail) on GitHub
 ```
 
-### Accessing the Stack
-- **Frontend App**: [http://localhost:5173](http://localhost:5173)
-- **Backend API**: [http://localhost:5000](http://localhost:5000)
-- **API Health Check**: [http://localhost:5000/health](http://localhost:5000/health)
-- **MongoDB Database**: `mongodb://localhost:27017/taskdb`
+### Pipeline Key Deliverables
+1. **Workflow File (`.github/workflows/ci.yml`)**: Automated trigger on `push` and `pull_request` to `main`, running on `ubuntu-latest` with Node 18.
+2. **Automated Test Suite (`tests/api.test.js`)**: Jest + Supertest testing health endpoints, route protection, validation pipelines, and 404 handlers.
+3. **Status Badge**: Real-time CI workflow status badge embedded at the top of this README.
+4. **Failure & Recovery Demonstration**: Verified deliberate failure (Red ❌) caused by broken assertion and immediate recovery (Green ✅) once resolved. Full logs in [docs/ci_cd_pipeline.md](docs/ci_cd_pipeline.md).
 
 ### Key Viva Questions & Answers
-- **Why backend references `mongodb` rather than `localhost`?** Containers reside in isolated network namespaces. On a custom bridge network (`app-network`), Docker's built-in DNS resolves container service names (`mongodb`) to container IPs. `localhost` inside the backend container refers only to the container itself.
-- **Difference between `EXPOSE` and `ports`?** `EXPOSE` is container documentation/metadata. `ports` in `docker-compose.yml` actually binds and publishes host ports to container ports so the host browser can access the service.
-- **Why avoid copying `node_modules` into image?** Prevents host OS binary mismatches (e.g. Windows vs Linux native modules), reduces build context transfer time, and guarantees reproducible Linux builds via `npm install`.
+- **Difference between CI and CD?** Continuous Integration (CI) is the practice of automatically testing and building code on every commit to verify that new changes integrate without regressions. Continuous Deployment (CD) automatically releases/deploys validated code into staging or production environments. This practical implements Continuous Integration (CI).
+- **Why automatic testing on push catches problems earlier?** Shortens the feedback loop from weeks/days to minutes. Isolates regressions to the exact commit that introduced them, eliminating compound integration failures before release.
+- **What happens if test file path is wrong?** The pipeline still fails with exit code 1 at the `npm test` step, but the failure log shows a file resolution/test discovery error rather than an assertion difference.
 
 ---
 
@@ -111,7 +120,10 @@ docker ps
 ## Automated Test Suites
 
 ```bash
-# Run Practical 7 Test Suite
+# Run Jest CI Automated Test Suite (Practical 12)
+npm test
+
+# Run Practical 7 Auth & Middleware Test Suite
 node test_practical7.js
 
 # Run Practical 9 Caching & Benchmark Suite

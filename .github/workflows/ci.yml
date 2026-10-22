@@ -1,0 +1,37 @@
+name: CI Pipeline
+
+# Trigger the workflow automatically on push or pull requests to main branch
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    name: Build and Automated Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout repository code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js runtime
+      - name: Set up Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      # Step 3: Install all dependencies (logged in Actions tab)
+      - name: Install Dependencies
+        run: npm install
+
+      # Step 4: Run automated tests and report pass/fail status
+      - name: Run Automated Tests
+        run: npm test
+        env:
+          NODE_ENV: test
+          PORT: 5000
+          JWT_SECRET: super_secret_ci_pipeline_key_2026

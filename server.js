@@ -62,20 +62,22 @@ app.use(errorHandler);
 // 7. Database Connection and Server Startup
 const MONGO_URI = process.env.MONGO_URI || "mongodb://mongodb:27017/taskdb";
 
-mongoose
-    .connect(MONGO_URI)
-    .then(() => {
-        console.log("-------------------------------------------------");
-        console.log(" Connected to MongoDB successfully");
-        console.log(` Target URI: ${MONGO_URI.includes("@") ? "MongoDB Atlas (Remote Cluster)" : MONGO_URI}`);
-        console.log(` Server running on http://0.0.0.0:${PORT}`);
-        console.log("-------------------------------------------------");
-        app.listen(PORT, "0.0.0.0", () => {
-            console.log(` Server actively listening on port ${PORT}`);
+if (process.env.NODE_ENV !== "test") {
+    mongoose
+        .connect(MONGO_URI)
+        .then(() => {
+            console.log("-------------------------------------------------");
+            console.log(" Connected to MongoDB successfully");
+            console.log(` Target URI: ${MONGO_URI.includes("@") ? "MongoDB Atlas (Remote Cluster)" : MONGO_URI}`);
+            console.log(` Server running on http://0.0.0.0:${PORT}`);
+            console.log("-------------------------------------------------");
+            app.listen(PORT, "0.0.0.0", () => {
+                console.log(` Server actively listening on port ${PORT}`);
+            });
+        })
+        .catch((err) => {
+            console.error("MongoDB connection failed:", err.message);
         });
-    })
-    .catch((err) => {
-        console.error("MongoDB connection failed:", err.message);
-    });
+}
 
 module.exports = app;
