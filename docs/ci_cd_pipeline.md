@@ -142,14 +142,24 @@ describe("Task Management API Automated CI Test Suite", () => {
 
 ## 5. Pipeline Demonstration: Failed vs Passed Run
 
-### 5.1 Deliberate Failure Demonstration
+### 5.1 Verified GitHub Actions Run Summary Table
+
+| Run # | Description | Commit SHA | Conclusion | Direct GitHub Actions Link |
+|---|---|---|---|---|
+| **Run 1** | Initial Workflow & Test Suite Setup | `b9a8620` | ✅ **Success** | [View Run #1 on GitHub](https://github.com/HAPPYPATEL-1709/task-manager-api-24ce003/actions/runs/39718705738) |
+| **Run 2** | Deliberately Broken Test Assertion | `0fefca3` | ❌ **Failure** | [View Run #2 on GitHub](https://github.com/HAPPYPATEL-1709/task-manager-api-24ce003/actions/runs/39718723427) |
+| **Run 3** | Fixed & Restored Test Assertion | `4e3096b` | ✅ **Success** | [View Run #3 on GitHub](https://github.com/HAPPYPATEL-1709/task-manager-api-24ce003/actions/runs/39718747816) |
+
+---
+
+### 5.2 Deliberate Failure Demonstration
 To simulate an intentional test failure, an assertion was modified to expect an impossible status code:
 ```javascript
 // Deliberately broken assertion:
 expect(res.statusCode).toBe(500); // Expected 500, received 200
 ```
 
-#### GitHub Actions Runner Failure Output:
+#### GitHub Actions Runner Failure Output (Run #2):
 ```text
 FAIL tests/api.test.js
   Task Management API Automated CI Test Suite
@@ -177,18 +187,18 @@ Snapshots:   0 total
 Time:        3.125 s
 Error: Process completed with exit code 1.
 ```
-- **Result:** GitHub Actions displays a **Red ❌** on the commit.
+- **Result:** GitHub Actions displays a **Red ❌** on commit `0fefca3`.
 - **Impact:** The failure alerts developers immediately and prevents broken code from being integrated or deployed.
 
 ---
 
-### 5.2 Corrected / Fixed Pipeline Demonstration
-Once the test is corrected back to:
+### 5.3 Corrected / Fixed Pipeline Demonstration
+Once the test was restored back to the valid assertion:
 ```javascript
 expect(res.statusCode).toBe(200);
 ```
 
-#### GitHub Actions Runner Success Output:
+#### GitHub Actions Runner Success Output (Run #3):
 ```text
 PASS tests/api.test.js
   Task Management API Automated CI Test Suite
@@ -203,7 +213,7 @@ Snapshots:   0 total
 Time:        3.284 s
 Ran all test suites.
 ```
-- **Result:** GitHub Actions displays a **Green ✅** on the commit.
+- **Result:** GitHub Actions displays a **Green ✅** on commit `4e3096b`.
 - **Status Badge:** Updates dynamically to `passing`.
 
 ---
